@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Axis Demo</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        body {
+            font: 11px sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .dot {
+        stroke: #000;
+        }
+
+        .tooltip {
+            position: absolute;
+            width: 200px;
+            height: 28px;
+            pointer-events: none;
+        }
+    </style>
+  </head>
+  <body>
+    <script>
+        var data = [
+            {dato: new Date("2015-03-15"), beskrivelse: "Her skjedde det noe"}, 
+            {dato: new Date("2015-08-23"), beskrivelse: "Her skjedde det noe annet"}, 
+            {dato: new Date("2016-02-02"), beskrivelse: "Her vet jeg ikke hva som skjedde.."}, 
+            {dato: new Date("2017-03-15"), beskrivelse: "Skjedde det noe her?"}, 
+            {dato: new Date("2017-11-15"), beskrivelse: "Ehh.."}
+        ];
+        
+        var tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        
+        var svgContainer = d3.select("body")
+            .append("svg")
+            .attr("width", 1100)
+            .attr("height", 400)
+            .style("padding", "10px")
+            .style("border", "1px solid");
+        
+        var xValue = function(d) { 
+            return d.dato;
+        }
+        
+        var formatertDato = function(d) {
+            console.log(d);
+            return d.dato.getDate() + '/' + d.dato.getMonth() + ' - ' + d.dato.getFullYear();
+        }
+        
+
+        var xScale = d3.scaleTime()
+            .domain([new Date(2015, 0, 1), new Date(2018, 0, 1)])
+            .range([0, 1000]);
+        
+        var xMap = function(d) { 
+            return xScale(xValue(d));
+        };
+        
+        svgContainer.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("r", 5)
+            .attr("cx", xMap)
+            .attr("cy", 350)
+            .style("fill", "green") 
+            .on("mouseover", function(d) {
+              tooltip.transition()
+                   .duration(200)
+                   .style("opacity", .9);
+              tooltip.html(d["beskrivelse"] + "<br/> " + formatertDato(d))
+                   .style("left", (d3.event.pageX + 5) + "px")
+                   .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+              tooltip.transition()
+                   .duration(500)
+                   .style("opacity", 0);
+            });
+
+        var xAxis = d3.axisBottom(xScale);
+
+        svgContainer.append("g")
+            .attr("transform", function() {
+                return "translate(" + 0 + "," + 390 + ")"
+            })
+            .call(xAxis);
+
+    </script>
+  </body>
+</html>
